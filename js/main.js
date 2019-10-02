@@ -1,12 +1,19 @@
 'use strict';
-var map = document.querySelector('.map');
+// константы для координат пинов
 var MAP_X_MIN = 0;
-var MAP_X_MAX = map.clientWidth;
+var MAP_X_MAX = document.querySelector('.map').clientWidth;
 var MAP_Y_MIN = 130;
 var MAP_Y_MAX = 630;
+var PIN_WIDTH = 50;
+var PIN_HEIGHT = 70;
+// константа для генерациии пинов
+var PINS_QUANTITY = 8;
+// переменные рабочей области
+var map = document.querySelector('.map');
+var mapPins = map.querySelector('.map__pins');
 var elementTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var fragment = document.createDocumentFragment();
-var ADS_QUANTITY = 8;
+// данные
 var adTypes = ['palace', 'flat', 'house', 'bungalo'];
 var chekinVariants = ['12:00', '13:00', '14:00'];
 var checkoutVariants = ['12:00', '13:00', '14:00'];
@@ -15,6 +22,7 @@ var photos = [
   'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
   'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
   'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
+
 
 // выбирает случайный элемент массива
 var getRandomItem = function (arr) {
@@ -34,9 +42,27 @@ var addLeadZero = function (number) {
   return number;
 };
 
+// получить множество подмножеств массива
+var getCombinations = function (array) {
+  var result = [];
+
+  var getSubset = function (index, subset) {
+    if (index === array.length) {
+      result.push(subset);
+      return;
+    }
+    getSubset(index + 1, subset.concat([array[index]]));
+    getSubset(index + 1, subset);
+  };
+
+  getSubset(0, []);
+  return result;
+};
+
+// создаем пины нужной структуры
 var createPins = function () {
   var pins = [];
-  for (var i = 0; i < ADS_QUANTITY; i++) {
+  for (var i = 0; i < PINS_QUANTITY; i++) {
     pins[i] = {
       author: {
         avatar: 'img/avatars/user' + addLeadZero(i + 1) + '.png'
@@ -50,33 +76,40 @@ var createPins = function () {
         guests: 1,
         checkin: getRandomItem(chekinVariants),
         checkout: getRandomItem(checkoutVariants),
-        features: features,
+        features: getRandomItem(getCombinations(features)),
         description: 'Описание',
         photos: photos
       },
       location: {
-        x: randomInteger(MAP_X_MIN, MAP_X_MAX),
-        y: randomInteger(MAP_Y_MIN, MAP_Y_MAX)
+        x: 0,
+        y: 0
       },
     };
   }
   return pins;
 };
 
+// наполняем шаблон пина данными
 var fillAdTemplate = function (elements) {
   for (var i = 0; i < elements.length; i++) {
     var element = elementTemplate.cloneNode(true);
-    element.style.left = (elements[i].location.x - element.clientWidth / 2) + 'px';
-    element.style.top = (elements[i].location.y - element.clientHeight) + 'px';
-    element.setAttribute('alt', elements[i].offer.title);
+    var coordinateX = randomInteger(MAP_X_MIN, MAP_X_MAX);
+    var coordinateY = randomInteger(MAP_Y_MIN, MAP_Y_MAX);
+    elements[i].location.x = coordinateX;
+    elements[i].location.y = coordinateY;
+    elements[i].offer.address = coordinateX + ',' + coordinateY;
+    element.style.left = (elements[i].location.x - PIN_WIDTH / 2) + 'px';
+    element.style.top = (elements[i].location.y - PIN_HEIGHT) + 'px';
+    element.setAttribute('alt', elements[i].offer.description);
     element.querySelector('img').setAttribute('src', elements[i].author.avatar);
     fragment.appendChild(element);
   }
   return fragment;
 };
 
-var mapPins = document.querySelector('.map__pins');
+// инициализация
 createPins();
 fillAdTemplate(createPins());
 map.classList.remove('map--faded');
 mapPins.appendChild(fragment);
+
