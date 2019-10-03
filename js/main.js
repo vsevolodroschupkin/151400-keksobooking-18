@@ -84,7 +84,7 @@ var createPins = function () {
       offer: {
         title: 'Объявление №' + getRandomInteger(AD_NUMBER_MIN, AD_NUMBER_MAX),
         address: coordinateX + ', ' + coordinateY,
-        price: getRandomInteger(PRICE_MIN, PRICE_MAX),,
+        price: getRandomInteger(PRICE_MIN, PRICE_MAX),
         type: getRandomItem(AD_TYPES),
         rooms: getRandomInteger(ROOM_NUMBER_MIN, ROOM_NUMBER_MAX),
         guests: getRandomInteger(GUEST_NUMBER_MIN, GUEST_NUMBER_MAX),
